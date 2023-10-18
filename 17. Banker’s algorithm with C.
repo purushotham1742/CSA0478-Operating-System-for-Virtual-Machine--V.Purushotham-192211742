@@ -1,0 +1,59 @@
+#include <stdio.h>
+
+int available[3] = {3, 3, 2};  // Available resources
+int max[4][3] = {
+    {7, 5, 3},
+    {3, 2, 2},
+    {9, 0, 2},
+    {2, 2, 2}
+};
+int allocation[4][3] = {
+    {0, 1, 0},
+    {2, 0, 0},
+    {3, 0, 2},
+    {2, 1, 1}
+};
+
+void checkSafety() {
+    int work[3], finish[4] = {0};
+    int safeSeq[4], count = 0;
+
+    for (int i = 0; i < 3; i++) {
+        work[i] = available[i];
+    }
+
+    while (count < 4) {
+        int found = 0;
+        for (int p = 0; p < 4; p++) {
+            if (!finish[p]) {
+                int canAllocate = 1;
+                for (int r = 0; r < 3; r++) {
+                    if (max[p][r] - allocation[p][r] > work[r]) {
+                        canAllocate = 0;
+                        break;
+                    }
+                }
+                if (canAllocate) {
+                    for (int r = 0; r < 3; r++) {
+                        work[r] += allocation[p][r];
+                    }
+                    safeSeq[count++] = p;
+                    finish[p] = 1;
+                    found = 1;
+                }
+            }
+        }
+        if (!found) {
+            printf("System is in an unsafe state.\n");
+            return;
+        }
+    }
+
+    printf("Safe Sequence: <P%d, P%d, P%d, P%d>\n", safeSeq[0], safeSeq[1], safeSeq[2], safeSeq[3]);
+    printf("System is in a safe state.\n");
+}
+
+int main() {
+    checkSafety();
+    return 0;
+}
