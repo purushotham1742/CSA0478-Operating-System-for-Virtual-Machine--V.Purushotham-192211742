@@ -1,0 +1,62 @@
+#include <stdio.h>
+
+struct Employee {
+    int empId;
+    char empName[50];
+    float empSalary;
+};
+
+int main() {
+    FILE *file = fopen("employee.dat", "ab+"); // Open or create the file for binary read and append
+
+    if (file == NULL) {
+        printf("Unable to open or create the file.\n");
+        return 1;
+    }
+
+    int choice;
+
+    while (1) {
+        printf("\nEmployee Record Management System\n");
+        printf("1. Add Employee\n");
+        printf("2. Display All Employees\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: {
+                struct Employee emp;
+                printf("Enter Employee ID: ");
+                scanf("%d", &emp.empId);
+                printf("Enter Employee Name: ");
+                scanf("%s", emp.empName);
+                printf("Enter Employee Salary: ");
+                scanf("%f", &emp.empSalary);
+
+                fseek(file, 0, SEEK_END); // Move the file pointer to the end
+                fwrite(&emp, sizeof(struct Employee), 1, file); // Write the employee record
+                printf("Employee record added successfully!\n");
+                break;
+            }
+            case 2: {
+                struct Employee emp;
+                rewind(file); // Move the file pointer to the beginning
+                printf("Employee Records:\n");
+
+                while (fread(&emp, sizeof(struct Employee), 1, file)) {
+                    printf("Employee ID: %d\n", emp.empId);
+                    printf("Employee Name: %s\n", emp.empName);
+                    printf("Employee Salary: %.2f\n", emp.empSalary);
+                    printf("\n");
+                }
+                break;
+            }
+            case 3:
+                fclose(file);
+                return 0;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+}
