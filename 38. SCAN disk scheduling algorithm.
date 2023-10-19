@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to calculate the total seek time using the SCAN algorithm
+int calculateSeekTime(int diskQueue[], int n, int initialPosition, int direction) {
+    int seekTime = 0;
+
+    if (direction == 1) {
+        // Sorting the requests in ascending order
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (diskQueue[i] > diskQueue[j]) {
+                    int temp = diskQueue[i];
+                    diskQueue[i] = diskQueue[j];
+                    diskQueue[j] = temp;
+                }
+            }
+        }
+    } else {
+        // Sorting the requests in descending order
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (diskQueue[i] < diskQueue[j]) {
+                    int temp = diskQueue[i];
+                    diskQueue[i] = diskQueue[j];
+                    diskQueue[j] = temp;
+                }
+            }
+        }
+    }
+
+    int currentPos = initialPosition;
+    int lastPos = (direction == 1) ? 0 : 199; // Disk size is assumed to be 200
+
+    for (int i = 0; i < n; i++) {
+        seekTime += abs(currentPos - diskQueue[i]);
+        currentPos = diskQueue[i];
+    }
+
+    seekTime += abs(currentPos - lastPos); // Move to the end of the disk
+
+    return seekTime;
+}
+
+int main() {
+    int n;
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &n);
+
+    int diskQueue[n];
+    printf("Enter the disk request queue:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Request %d: ", i + 1);
+        scanf("%d", &diskQueue[i]);
+    }
+
+    int initialPosition;
+    printf("Enter the initial head position: ");
+    scanf("%d", &initialPosition);
+
+    int direction;
+    printf("Enter the initial direction (1 for towards the end, -1 for towards the beginning): ");
+    scanf("%d", &direction);
+
+    int totalSeekTime = calculateSeekTime(diskQueue, n, initialPosition, direction);
+
+    printf("Total seek time using SCAN: %d\n", totalSeekTime);
+
+    return 0;
+}
