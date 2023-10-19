@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_FRAMES 3 // Number of page frames in memory
+
+// Function to initialize page frames
+void initializeFrames(int frames[], int n) {
+    for (int i = 0; i < n; i++) {
+        frames[i] = -1; // -1 represents an empty frame
+    }
+}
+
+// Function to display the current state of page frames
+void displayFrames(int frames[], int n) {
+    printf("Current Page Frames: ");
+    for (int i = 0; i < n; i++) {
+        if (frames[i] == -1) {
+            printf("[ ] ");
+        } else {
+            printf("[%d] ", frames[i]);
+        }
+    }
+    printf("\n");
+}
+
+// Function to check if a page is already in memory
+bool pageExists(int frames[], int n, int page) {
+    for (int i = 0; i < n; i++) {
+        if (frames[i] == page) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Function to update the order of pages in the queue
+void updateQueue(int queue[], int n, int page) {
+    for (int i = 0; i < n; i++) {
+        if (queue[i] == page) {
+            for (int j = i; j < n - 1; j++) {
+                queue[j] = queue[j + 1];
+            }
+            queue[n - 1] = page;
+            break;
+        }
+    }
+}
+
+// LRU page replacement algorithm
+void lruPageReplacement(int pages[], int num_pages) {
+    int frames[MAX_FRAMES];
+    int queue[MAX_FRAMES];
+
+    initializeFrames(frames, MAX_FRAMES);
+
+    int page_faults = 0;
+
+    for (int i = 0; i < num_pages; i++) {
+        int current_page = pages[i];
+        displayFrames(frames, MAX_FRAMES);
+
+        if (!pageExists(frames, MAX_FRAMES, current_page)) {
+            // Page fault: Replace the front page in the queue
+            int page_to_replace = queue[0];
+
+            for (int j = 0; j < MAX_FRAMES; j++) {
+                if (frames[j] == page_to_replace) {
+                    frames[j] = current_page;
+                    break;
+                }
+            }
+
+            // Update the order of pages in the queue
+            updateQueue(queue, MAX_FRAMES, page_to_replace);
+
+            page_faults++;
+        }
+
+        updateQueue(queue, MAX_FRAMES, current_page);
+    }
+
+    printf("Total Page Faults: %d\n", page_faults);
+}
+
+int main() {
+    int pages[] = {1, 3, 0, 3, 5, 6, 3};
+    int num_pages = sizeof(pages) / sizeof(pages[0]);
+
+    printf("Simulating LRU Page Replacement Algorithm:\n");
+    lruPageReplacement(pages, num_pages);
+
+    return 0;
+}
