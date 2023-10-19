@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to calculate the total seek time
+int calculateSeekTime(int diskQueue[], int n, int initialPosition) {
+    int seekTime = 0;
+
+    for (int i = 0; i < n; i++) {
+        seekTime += abs(initialPosition - diskQueue[i]);
+        initialPosition = diskQueue[i];
+    }
+
+    return seekTime;
+}
+
+int main() {
+    int n;
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &n);
+
+    int diskQueue[n];
+    printf("Enter the disk request queue:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Request %d: ", i + 1);
+        scanf("%d", &diskQueue[i]);
+    }
+
+    int initialPosition;
+    printf("Enter the initial head position: ");
+    scanf("%d", &initialPosition);
+
+    int totalSeekTime = calculateSeekTime(diskQueue, n, initialPosition);
+
+    printf("Total seek time using FCFS: %d\n", totalSeekTime);
+
+    return 0;
+}
