@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the maximum number of data blocks and record size
+#define MAX_BLOCKS 100
+#define BLOCK_SIZE 256
+
+// Define a structure for the file
+struct IndexedFile {
+    char indexBlock[MAX_BLOCKS];
+    char dataBlocks[MAX_BLOCKS][BLOCK_SIZE];
+    int blockCount;
+};
+
+// Initialize an indexed file
+void initializeFile(struct IndexedFile* file) {
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        file->indexBlock[i] = -1; // -1 represents an empty entry
+    }
+    file->blockCount = 0;
+}
+
+// Add a new record to the file
+void addRecord(struct IndexedFile* file, const char* record) {
+    if (file->blockCount < MAX_BLOCKS) {
+        int blockIndex = file->blockCount;
+        file->indexBlock[blockIndex] = blockIndex;
+        strcpy(file->dataBlocks[blockIndex], record);
+        file->blockCount++;
+    } else {
+        printf("File is full. Cannot add more records.\n");
+    }
+}
+
+// Read all records in the file
+void readAllRecords(struct IndexedFile* file) {
+    if (file->blockCount == 0) {
+        printf("File is empty.\n");
+    } else {
+        printf("Contents of the file:\n");
+        for (int i = 0; i < file->blockCount; i++) {
+            int blockIndex = file->indexBlock[i];
+            printf("Record %d: %s\n", i + 1, file->dataBlocks[blockIndex]);
+        }
+    }
+}
+
+int main() {
+    struct IndexedFile file;
+    initializeFile(&file);
+
+    int choice;
+    char record[BLOCK_SIZE];
+
+    while (1) {
+        printf("Options:\n");
+        printf("1. Add a new record\n");
+        printf("2. Read all records\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the new record: ");
+                scanf(" %[^\n]", record); // Read the record with spaces
+                addRecord(&file, record);
+                break;
+            case 2:
+                readAllRecords(&file);
+                break;
+            case 3:
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
