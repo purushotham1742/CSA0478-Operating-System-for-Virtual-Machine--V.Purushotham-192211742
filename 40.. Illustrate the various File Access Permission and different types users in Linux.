@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+int main() {
+    char *filename = "example.txt"; // Replace with the file you want to check
+
+    struct stat fileStat;
+    if (stat(filename, &fileStat) == -1) {
+        perror("Error while using stat");
+        return 1;
+    }
+
+    // Check the file type
+    if (S_ISREG(fileStat.st_mode)) {
+        printf("%s is a regular file.\n", filename);
+    } else if (S_ISDIR(fileStat.st_mode)) {
+        printf("%s is a directory.\n", filename);
+    } else {
+        printf("%s is neither a regular file nor a directory.\n", filename);
+    }
+
+    // Check user permissions
+    if (fileStat.st_mode & S_IRUSR) {
+        printf("User has read permission.\n");
+    }
+    if (fileStat.st_mode & S_IWUSR) {
+        printf("User has write permission.\n");
+    }
+    if (fileStat.st_mode & S_IXUSR) {
+        printf("User has execute permission.\n");
+    }
+
+    // Check group permissions
+    if (fileStat.st_mode & S_IRGRP) {
+        printf("Group has read permission.\n");
+    }
+    if (fileStat.st_mode & S_IWGRP) {
+        printf("Group has write permission.\n");
+    }
+    if (fileStat.st_mode & S_IXGRP) {
+        printf("Group has execute permission.\n");
+    }
+
+    // Check others' permissions
+    if (fileStat.st_mode & S_IROTH) {
+        printf("Others have read permission.\n");
+    }
+    if (fileStat.st_mode & S_IWOTH) {
+        printf("Others have write permission.\n");
+    }
+    if (fileStat.st_mode & S_IXOTH) {
+        printf("Others have execute permission.\n");
+    }
+
+    return 0;
+}
