@@ -1,0 +1,41 @@
+#include <stdio.h>
+
+int main() {
+    // File pointer
+    FILE *file;
+
+    // Create a new file or open an existing file for writing
+    file = fopen("sample.txt", "w");
+
+    if (file == NULL) {
+        printf("File could not be opened or created.\n");
+        return 1;
+    }
+
+    // Write data to the file
+    fprintf(file, "Hello, this is a sample file!\n");
+    fprintf(file, "You can write more lines here.\n");
+
+    // Close the file
+    fclose(file);
+
+    // Open the file for reading
+    file = fopen("sample.txt", "r");
+
+    if (file == NULL) {
+        printf("File could not be opened.\n");
+        return 1;
+    }
+
+    // Read and display the contents of the file
+    char line[100];
+    printf("Contents of the file:\n");
+    while (fgets(line, sizeof(line), file) != NULL) {
+        printf("%s", line);
+    }
+
+    // Close the file again
+    fclose(file);
+
+    return 0;
+}
