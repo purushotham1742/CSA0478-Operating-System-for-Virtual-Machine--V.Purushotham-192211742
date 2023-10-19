@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the maximum number of records and record size
+#define MAX_RECORDS 100
+#define RECORD_SIZE 256
+
+// Define a structure for the file
+struct SequentialFile {
+    char records[MAX_RECORDS][RECORD_SIZE];
+    int recordCount;
+};
+
+// Initialize a sequential file
+void initializeFile(struct SequentialFile* file) {
+    file->recordCount = 0;
+}
+
+// Add a new record to the file
+void addRecord(struct SequentialFile* file, const char* record) {
+    if (file->recordCount < MAX_RECORDS) {
+        strcpy(file->records[file->recordCount], record);
+        file->recordCount++;
+    } else {
+        printf("File is full. Cannot add more records.\n");
+    }
+}
+
+// Read all records in the file
+void readAllRecords(struct SequentialFile* file) {
+    if (file->recordCount == 0) {
+        printf("File is empty.\n");
+    } else {
+        printf("Contents of the file:\n");
+        for (int i = 0; i < file->recordCount; i++) {
+            printf("Record %d: %s\n", i + 1, file->records[i]);
+        }
+    }
+}
+
+int main() {
+    struct SequentialFile file;
+    initializeFile(&file);
+
+    int choice;
+    char record[RECORD_SIZE];
+
+    while (1) {
+        printf("Options:\n");
+        printf("1. Add a new record\n");
+        printf("2. Read all records\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the new record: ");
+                scanf(" %[^\n]", record); // Read the record with spaces
+                addRecord(&file, record);
+                break;
+            case 2:
+                readAllRecords(&file);
+                break;
+            case 3:
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
