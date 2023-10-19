@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+#define NUM_THREADS 2
+#define NUM_ITERATIONS 5
+
+// Shared resource and semaphores
+int shared_resource = 0;
+sem_t sem;
+
+void* thread_function(void* thread_id) {
+    int id = *(int*)thread_id;
+    for (int i = 0; i < NUM_ITERATIONS; i++) {
+        // Entry section
+        sem_wait(&sem);
+
+        // Critical section
+        shared_resource++;
+        printf("Thread %d: shared_resource = %d\n", id, shared_resource);
+
+        // Exit section
+        sem_post(&sem);
+
+        // Remainder section (outside of the critical region)
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    int thread_ids[NUM_THREADS] = {1, 2};
+
+    // Initialize the semaphore
+    sem_init(&sem, 0, 1);
+
+    // Create threads
+    for (int i = 0; i < NUM_THREADS; i++) {
+        if (pthread_create(&threads[i], NULL, thread_function, &thread_ids[i])) {
+            printf("Error creating thread %d\n", i);
+            return 1;
+        }
+    }
+
+    // Wait for threads to finish
+    for (int i = 0; i < NUM_THREADS; i++) {
+        if (pthread_join(threads[i], NULL)) {
+            printf("Error joining thread %d\n", i);
+            return 1;
+        }
+    }
+
+    // Destroy the semaphore
+    sem_destroy(&sem);
+
+    return 0;
+}
