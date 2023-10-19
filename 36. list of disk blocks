@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Define the maximum number of blocks and block size
+#define MAX_BLOCKS 100
+#define BLOCK_SIZE 256
+
+// Define a structure for a disk block
+struct DiskBlock {
+    char data[BLOCK_SIZE];
+    int nextBlock; // Pointer to the next block
+};
+
+// Define a structure for a file
+struct LinkedFile {
+    int firstBlock; // Pointer to the first block
+    int lastBlock;  // Pointer to the last block
+};
+
+// Initialize the disk blocks
+void initializeDiskBlocks(struct DiskBlock disk[], int numBlocks) {
+    for (int i = 0; i < numBlocks; i++) {
+        disk[i].nextBlock = -1; // -1 represents no next block
+        memset(disk[i].data, 0, BLOCK_SIZE); // Initialize data to zero
+    }
+}
+
+// Initialize a linked file
+void initializeFile(struct LinkedFile* file) {
+    file->firstBlock = -1; // -1 represents an empty file
+    file->lastBlock = -1;
+}
+
+// Add a new record to the file
+void addRecord(struct DiskBlock disk[], struct LinkedFile* file, const char* record, int numBlocks) {
+    int blockIndex = 0;
+
+    if (file->firstBlock == -1) {
+        // If the file is empty, find the first empty block
+        while (blockIndex < numBlocks && disk[blockIndex].nextBlock != -1) {
+            blockIndex++;
+        }
+        if (blockIndex < numBlocks) {
+            file->firstBlock = blockIndex;
+            file->lastBlock = blockIndex;
+        }
+    } else {
+        // If the file is not empty, find the next empty block
+        while (blockIndex < numBlocks && disk[blockIndex].nextBlock != -1) {
+            blockIndex++;
+        }
+        if (blockIndex < numBlocks) {
+            disk[file->lastBlock].nextBlock = blockIndex;
+            file->lastBlock = blockIndex;
+        }
+    }
+
+    // Copy the record data into the block
+    if (blockIndex < numBlocks) {
+        strncpy(disk[blockIndex].data, record, BLOCK_SIZE - 1);
+        disk[blockIndex].nextBlock = -1; // Mark it as the last block
+    } else {
+        printf("File is full. Cannot add more records.\n");
+    }
+}
+
+// Read all records in the file
+void readAllRecords(struct DiskBlock disk[], struct LinkedFile* file) {
+    int currentBlock = file->firstBlock;
+    int recordNumber = 1;
+
+    if (currentBlock == -1) {
+        printf("File is empty.\n");
+        return;
+    }
+
+    printf("Contents of the file:\n");
+    while (currentBlock != -1) {
+        printf("Record %d: %s\n", recordNumber, disk[currentBlock].data);
+        currentBlock = disk[currentBlock].nextBlock;
+        recordNumber++;
+    }
+}
+
+int main() {
+    int numBlocks = MAX_BLOCKS;
+    struct DiskBlock disk[MAX_BLOCKS];
+    initializeDiskBlocks(disk, numBlocks);
+
+    struct LinkedFile file;
+    initializeFile(&file);
+
+    int choice;
+    char record[BLOCK_SIZE];
+
+    while (1) {
+        printf("Options:\n");
+        printf("1. Add a new record\n");
+        printf("2. Read all records\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the new record: ");
+                scanf(" %[^\n]", record); // Read the record with spaces
+                addRecord(disk, &file, record, numBlocks);
+                break;
+            case 2:
+                readAllRecords(disk, &file);
+                break;
+            case 3:
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
