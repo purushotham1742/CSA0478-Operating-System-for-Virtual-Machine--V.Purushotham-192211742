@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define NUM_READERS 3
+#define NUM_WRITERS 2
+
+int shared_data = 0;
+pthread_mutex_t mutex;
+int reader_count = 0;
+
+void* reader(void* arg) {
+    int reader_id = *(int*)arg;
+    while (1) {
+        pthread_mutex_lock(&mutex);
+        reader_count++;
+        if (reader_count == 1) {
+            // First reader locks the shared resource
+            // Prevents writers from writing
+            pthread_mutex_lock(&mutex);
+        }
+        pthread_mutex_unlock(&mutex);
+
+        // Read the shared resource
+        printf("Reader %d reads: %d\n", reader_id, shared_data);
+        fflush(stdout); // Flush the output
+
+        pthread_mutex_lock(&mutex);
+        reader_count--;
+        if (reader_count == 0) {
+            // Last reader unlocks the shared resource
+            // Allows writers to write if any
+            pthread_mutex_unlock(&mutex);
+        }
+        pthread_mutex_unlock(&mutex);
+    }
+    return NULL;
+}
+
+void* writer(void* arg) {
+    int writer_id = *(int*)arg;
+    while (1) {
+        // Writers exclusively lock the shared resource
+        pthread_mutex_lock(&mutex);
+        // Write to the shared resource
+        shared_data++;
+        printf("Writer %d writes: %d\n", writer_id, shared_data);
+        fflush(stdout); // Flush the output
+        pthread_mutex_unlock(&mutex);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t readers[NUM_READERS];
+    pthread_t writers[NUM_WRITERS];
+
+    pthread_mutex_init(&mutex, NULL);
+
+    int reader_ids[NUM_READERS];
+    int writer_ids[NUM_WRITERS];
+
+    for (int i = 0; i < NUM_READERS; i++) {
+        reader_ids[i] = i;
+        pthread_create(&readers[i], NULL, reader, &reader_ids[i]);
+    }
+
+    for (int i = 0; i < NUM_WRITERS; i++) {
+        writer_ids[i] = i;
+        pthread_create(&writers[i], NULL, writer, &writer_ids[i]);
+    }
+
+    pthread_join(readers[0], NULL);  // Just wait for one reader (optional)
+
+    pthread_mutex_destroy(&mutex);
+
+    return 0;
+}
